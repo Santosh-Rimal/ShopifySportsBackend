@@ -1,0 +1,542 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Cart;
+use App\Models\About;
+use App\Models\Order;
+use App\Models\Contact;
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\District;
+use App\Models\Province;
+use App\Events\InquiryEvent;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+class ApiController extends Controller
+{
+
+    // ----------------------Contact API-------------------
+    
+   public function indexInquiry(Request $request)
+    {
+        try {
+            $validation = Validator::make($request->all(), [
+                'name' => 'required',
+                'email' => 'email|required',
+                'message' => 'required',
+                'user_id' => 'nullable',
+            ]);
+
+
+            if ($validation->fails()) {
+                return response()->json(['statusCode' => 401, 'error' => true, 'error_message' => $validation->errors(), 'message' => 'Please fill the input field properly']);
+            }
+            Contact::create($request->all());
+
+        Broadcast(new InquiryEvent($request->all()));
+
+           
+            return response()->json([
+                "statusCode" => 200,
+                "error" => false,
+                'message' => 'Thank you, your enquiry has been submitted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['statusCode' => 401, 'error' => true, 'message' => $e->getMessage()]);
+        }
+    }
+
+
+// -----------------------------Category API---------------------------
+public function categoryIndex()
+{
+    try {
+        $categories = Category::with('product')->get();
+
+        // Iterate through categories and update the image path for each product
+        foreach ($categories as $category) {
+            foreach ($category->product as $product) {
+                $product['image'] = asset('storage/' . $product->image);
+            }
+        }
+
+        return response()->json([
+            "statusCode" => 200,
+            "error" => false,
+            'data' => $categories
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['statusCode' => 401, 'error' => true, 'message' => $e->getMessage()]);
+    }
+}
+
+
+// -------------------------SINGLE CATEGORY API---------------------------
+public function categorysingle($id)
+{
+    try {
+        $category = Category::with('product')->findOrFail($id);
+
+        // Update the image path for each product in this category
+        foreach ($category->product as $product) {
+            $product['image'] = asset('storage/' . $product->image);
+        }
+
+        return response()->json([
+            "statusCode" => 200,
+            "error" => false,
+            'data' => $category
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'statusCode' => 404, 
+            'error' => true, 
+            'message' => 'Category not found'
+        ]);
+    }
+}
+
+
+
+// --------------------------------About API--------------------------
+public function aboutIndex()
+    {
+        try {
+            
+           $abouts=About::get();
+           foreach ($abouts as $key => $about) {
+            $about['image']=asset('storage/' . $about->image);
+           }
+            return response()->json([
+                "statusCode" => 200,
+                "error" => false,
+                'date' => $abouts
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['statusCode' => 401, 'error' => true, 'message' => $e->getMessage()]);
+        }
+    }
+// ---------------------------POST Cart API------------------------------
+public function cart(Request $request)
+    {
+        try {
+            $validation = Validator::make($request->all(), [
+                'user_id' => 'required',
+                'product_id' => 'required',
+                'quantity' => 'required'
+            ]);
+           
+
+            if ($validation->fails()) {
+                return response()->json(['statusCode' => 401, 'error' => true, 'error_message' => $validation->errors(), 'message' => 'Please fill the input field properly']);
+            }
+            Cart::create($request->all());
+           
+            return response()->json([
+                "statusCode" => 200,
+                "error" => false,
+                'message' => 'Thank you, your enquiry has been submitted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['statusCode' => 401, 'error' => true, 'message' => $e->getMessage()]);
+        }
+    }
+// --------------------------Get Cart API----------------------------
+    public function getCart()
+    {
+        try {
+            
+           $carts=Cart::with('product','user')->get();
+            return response()->json([
+                "statusCode" => 200,
+                "error" => false,
+                'date' => $carts
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['statusCode' => 401, 'error' => true, 'message' => $e->getMessage()]);
+        }
+    }
+
+
+
+
+    //------------------------ Get Single User Cart--------------------
+    public function singleUserCart($id)
+{
+    try {
+        // Fetch cart items with related product and user details for the authenticated user
+        $cartItems = Cart::with('product', 'user')->where('user_id', $id)->get();
+
+        // Loop through the cart items to modify the product's image path
+        foreach ($cartItems as $cart) {
+            if ($cart->product) {
+                $cart->product->image = asset('storage/' . $cart->product->image);
+            }
+        }
+
+        // Check if the cart is empty
+        if ($cartItems->isEmpty()) {
+            return response()->json([
+                'statusCode' => 404,
+                'error' => true,
+                'message' => 'No items found in your cart',
+                'data' => []
+            ], 404);
+        }
+
+        // Return the cart items as JSON
+        return response()->json([
+            'statusCode' => 200,
+            'error' => false,
+            'message' => 'Cart items retrieved successfully',
+            'data' => $cartItems
+        ], 200);
+
+    } catch (\Exception $e) {
+        // Handle errors
+        return response()->json([
+            'statusCode' => 500,
+            'error' => true,
+            'message' => 'An error occurred: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+
+// --------------------------UPDATE Cart-------------------------
+
+public function updateCartItem(Request $request, $id)
+{
+    try {
+        // Validate the input
+        $validation = Validator::make($request->all(), [
+            'quantity' => 'required|integer|min:1'
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json([
+                'statusCode' => 400,
+                'error' => true,
+                'message' => $validation->errors()
+            ]);
+        }
+
+        // Find the cart item by ID
+        $cartItem = Cart::find($id);
+
+        // Check if the cart item exists
+        if (!$cartItem) {
+            return response()->json([
+                'statusCode' => 404,
+                'error' => true,
+                'message' => 'Cart item not found'
+            ], 404);
+        }
+
+        // Update the cart item quantity
+        $cartItem->update($request->all());
+        
+
+        return response()->json([
+            'statusCode' => 200,
+            'error' => false,
+            'message' => 'Cart item updated successfully'
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'statusCode' => 500,
+            'error' => true,
+            'message' => 'An error occurred: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+// -----------------------------DELETE Cart-------------------------------
+
+
+public function deleteCartItem($id)
+{
+    try {
+        // Find the cart item by ID
+        $cartItem = Cart::find($id);
+
+        // Check if the cart item exists
+        if (!$cartItem) {
+            return response()->json([
+                'statusCode' => 404,
+                'error' => true,
+                'message' => 'Cart item not found'
+            ], 404);
+        }
+
+        // Delete the cart item
+        $cartItem->delete();
+
+        return response()->json([
+            'statusCode' => 200,
+            'error' => false,
+            'message' => 'Cart item deleted successfully'
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'statusCode' => 500,
+            'error' => true,
+            'message' => 'An error occurred: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+
+// ----------------------POST Order API------------------------
+
+public function order(Request $request)
+{
+    try {
+        // Validate all necessary inputs
+        $validation = Validator::make($request->all(), [
+            'user_id'       => 'required|exists:users,id',  // Must exist in the users table
+            'name'          => 'required|string|max:255',   // Required name field, max 255 characters
+            'phoneno'       => 'required|digits:10',        // Must be a 10-digit phone number
+            'province'      => 'required|string|max:255',   // Required province field, max 255 characters
+            'district'      => 'required|string|max:255',   // Required district field, max 255 characters
+            'city'          => 'required|string|max:255',   // Required city field, max 255 characters
+            'postalcode'    => 'required|string|max:10',    // Postal code required, max length of 10
+            'streetaddress' => 'required|string|max:255',   // Required street address, max 255 characters
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json([
+                'statusCode'    => 401,
+                'error'         => true,
+                'error_message' => $validation->errors(),
+                'message'       => 'Please fill in all required fields correctly.'
+            ]);
+        }
+
+        // Fetch the cart items for the user
+        $cartItems = Cart::where('user_id', $request->user_id)->with('product')->get();
+
+        if ($cartItems->isEmpty()) {
+            return response()->json([
+                'statusCode' => 400,
+                'error'      => true,
+                'message'    => 'Your cart is empty. Please add items to your cart before placing an order.'
+            ]);
+        }
+
+        // Calculate the total price
+        $total = $cartItems->sum(function ($cartItem) {
+            return $cartItem->product->price * $cartItem->quantity;
+        });
+
+        // Create the order
+        $order = Order::create([
+            'user_id'       => $request->user_id,
+            'name'          => $request->input('name'),            // Full name
+            'phoneno'       => $request->input('phoneno'),         // Phone number
+            'province'      => $request->input('province'),        // Province
+            'district'      => $request->input('district'),        // District
+            'city'          => $request->input('city'),            // City
+            'postalcode'    => $request->input('postalcode'),      // Postal code
+            'streetaddress' => $request->input('streetaddress'),   // Street address
+            'total'         => $total,
+            'status'        => 'pending',                          // Default status
+            'invoice'       => time(),                             // Unique invoice number (timestamp)
+        ]);
+
+        // Attach products to the order and clear the cart
+        foreach ($cartItems as $cartItem) {
+            $order->orderItems()->create([
+                'product_id' => $cartItem->product_id,
+                'quantity'   => $cartItem->quantity,
+                'price'      => $cartItem->product->price,
+            ]);
+        }
+
+        // Clear the cart for this user
+        Cart::where('user_id', $request->user_id)->delete();
+
+        return response()->json([
+            "statusCode" => 200,
+            "error"      => false,
+            'message'    => 'Order placed successfully.',
+            'order'      => $order
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'statusCode' => 500,
+            'error'      => true,
+            'message'    => 'An error occurred while placing the order: ' . $e->getMessage()
+        ]);
+    }
+}
+
+
+    // ------------------------------GET Single users Order API---------------------
+   public function getOrder($userId)
+{
+    try {
+        // Retrieve orders for the specified user
+       $orders = Order::with(['user', 'orderItems.product'])
+               ->where('user_id', $userId)
+               ->get();
+        // Check if the user has orders
+        if ($orders->isEmpty()) {
+            return response()->json([
+                "statusCode" => 404,
+                "error" => true,
+                "message" => "No orders found for this user."
+            ]);
+        }
+
+        return response()->json([
+            "statusCode" => 200,
+            "error" => false,
+            "data" => $orders
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['statusCode' => 401, 'error' => true, 'message' => $e->getMessage()]);
+    }
+}
+
+
+ public function getAllOrder()
+{
+    try {
+        // Retrieve orders for the specified user
+        $orders = Order::with('user','orderItems.product')->get();
+        
+        // Check if the user has orders
+        if ($orders->isEmpty()) {
+            return response()->json([
+                "statusCode" => 404,
+                "error" => true,
+                "message" => "No orders found for this user."
+            ]);
+        }
+
+        return response()->json([
+            "statusCode" => 200,
+            "error" => false,
+            "data" => $orders
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['statusCode' => 401, 'error' => true, 'message' => $e->getMessage()]);
+    }
+}
+
+
+
+    // ----------------getProduct  API----------------------
+
+
+    public function productsIndex()
+    {
+        try {
+            $products = Product::with('category')->get();
+            foreach ($products as $key => $product) {
+                $product['image']=asset('storage/' . $product->image);
+            }
+            return response()->json([
+                "statusCode" => 200,
+                "error" => false,
+                'data' => $products
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['statusCode' => 401, 'error' => true, 'message' => $e->getMessage()]);
+        }
+    }
+
+
+    public function productSingle($id)
+{
+    try {
+        $product = Product::with('category')->findOrFail($id);
+         $product['image']=asset('storage/' . $product->image);
+        return response()->json([
+            "statusCode" => 200,
+            "error" => false,
+            'data' => $product
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['statusCode' => 404, 'error' => true, 'message' => 'Product not found']);
+    }
+}
+
+
+
+// API for Address i.e province & districts
+
+public function getProvinces()
+    {
+        try {
+            $provinces = Province::get();
+            return response()->json([
+                "statusCode" => 200,
+                "error" => false,
+                "data" => $provinces
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                "statusCode" => 401,
+                "error" => true,
+                "message" => $e->getMessage()
+            ]);
+        }
+    }
+
+    // Get all districts
+    public function getDistricts()
+    {
+        try {
+            $districts = District::with('province')->get();
+            return response()->json([
+                "statusCode" => 200,
+                "error" => false,
+                "data" => $districts
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                "statusCode" => 401,
+                "error" => true,
+                "message" => $e->getMessage()
+            ]);
+        }
+    }
+
+    // Get districts by a specific province
+    public function getDistrictsByProvince($provinceName)
+    {
+        try {
+            $province = Province::where('name', $provinceName)->first();
+
+            if (!$province) {
+                return response()->json([
+                    "statusCode" => 404,
+                    "error" => true,
+                    "message" => "Province not found"
+                ]);
+            }
+
+            $districts = District::where('province_id', $province->id)->get();
+            return response()->json([
+                "statusCode" => 200,
+                "error" => false,
+                "data" => $districts
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                "statusCode" => 401,
+                "error" => true,
+                "message" => $e->getMessage()
+            ]);
+        }
+    }
+
+
+
+}
