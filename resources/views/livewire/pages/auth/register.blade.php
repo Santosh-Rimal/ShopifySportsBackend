@@ -10,6 +10,8 @@ use Livewire\Volt\Component;
 use Livewire\Attributes\Title;
 new #[Layout('layouts.guest')] class extends Component {
     public string $name = '';
+    public string $phone = '';
+    public string $address = '';
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
@@ -21,6 +23,8 @@ new #[Layout('layouts.guest')] class extends Component {
     {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:255'],
+            'address' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
@@ -52,6 +56,21 @@ new #[Layout('layouts.guest')] class extends Component {
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
         </div>
 
+        <!-- Phone -->
+        <div class="mt-4">
+            <x-input-label for="phone" :value="__('Phone')" />
+            <x-text-input class="block mt-1 w-full" id="phone" wire:model="phone" type="text" name="phone"
+                required autocomplete="Phone" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+        </div>
+
+        <!--  Address -->
+        <div class="mt-4">
+            <x-input-label for="address" :value="__('Address')" />
+            <x-text-input class="block mt-1 w-full" id="address" wire:model="address" type="text" name="address"
+                required autocomplete="username" />
+            <x-input-error class="mt-2" :messages="$errors->get('address')" />
+        </div>
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />

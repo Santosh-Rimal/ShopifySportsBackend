@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'phone' => '9800000000',
+            'address' => 'text Address',
             'password' => 'password',
             'role'=>'customer',
             'image'=>'https://cdn2.iconfinder.com/data/icons/people-groups/512/Man_Woman_Avatar-512.png',
@@ -31,6 +33,8 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
+            'phone' => '9800000000',
+            'address' => 'text Address',
             'password' => 'password',
             'role'=>'admin',
             'image'=>'https://cdn2.iconfinder.com/data/icons/people-groups/512/Man_Woman_Avatar-512.png',

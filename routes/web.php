@@ -7,7 +7,7 @@ use App\Livewire\Admin\About\Aboutus;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Inquiry\Inquiry;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\ShopController;
+use App\Http\Controllers\ShopController; 
 use App\Livewire\Admin\Product\Products;
 use App\Http\Controllers\OrderController;
 use App\Livewire\Admin\About\CreateAbout;
