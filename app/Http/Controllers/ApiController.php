@@ -11,6 +11,7 @@ use App\Models\Category;
 use App\Models\District;
 use App\Models\Province;
 use App\Events\InquiryEvent;
+use App\Models\RatingReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -345,7 +346,7 @@ public function order(Request $request)
             'streetaddress' => $request->input('streetaddress'),   // Street address
             'total'         => $total,
             'status'        => 'pending',                          // Default status
-            'invoice'       => time(),                             // Unique invoice number (timestamp)
+            'invoice'       => $request->input('invoice'),                             // Unique invoice number (timestamp)
         ]);
 
         // Attach products to the order and clear the cart
@@ -376,14 +377,73 @@ public function order(Request $request)
 }
 
 
+
+
+// Update order status arrcoding to payment success or failed
+public function updateOrderStatus(Request $request, $transactionCode)
+{
+    try {
+        // Retrieve the order based on the transaction_code from the URL
+        $order = Order::where('invoice', $transactionCode)->first();
+        dd($request);
+        if (!$order) {
+            return response()->json([
+                'statusCode' => 404,
+                'error'      => true,
+                'message'    => 'Order not found.',
+            ]);
+        }
+
+        // Update the status and other fields from the request
+        $order->update([
+            'status' => $request->input('status'), // Update the status
+            // Add other fields you want to update if necessary
+            // Example: 'total_amount' => $request->input('total_amount'),
+        ]);
+
+        return response()->json([
+            'statusCode' => 200,
+            'error'      => false,
+            'message'    => 'Order status updated to completed.',
+            'order'      => $order,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'statusCode' => 500,
+            'error'      => true,
+            'message'    => 'An error occurred while updating the order status: ' . $e->getMessage(),
+        ]);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // ------------------------------GET Single users Order API---------------------
    public function getOrder($userId)
 {
     try {
         // Retrieve orders for the specified user
-       $orders = Order::with(['user', 'orderItems.product'])
+     $orders= Order::with(['user', 'orderItems.product'])
                ->where('user_id', $userId)
                ->get();
+    if($orders->isEmpty()){
+        $orders= Order::with(['user', 'orderItems.product'])
+               ->where('invoice', $userId)
+               ->get();
+    }
+
+
         // Check if the user has orders
         if ($orders->isEmpty()) {
             return response()->json([
@@ -452,20 +512,37 @@ public function order(Request $request)
     }
 
 
-    public function productSingle($id)
+    // Fetch single and related product
+
+   public function productSingle($id)
 {
     try {
+        // Fetch the product along with its category
         $product = Product::with('category')->findOrFail($id);
-         $product['image']=asset('storage/' . $product->image);
+        $product['image'] = asset('storage/' . $product->image);
+
+        // Fetch related products from the same category, excluding the current product
+        $relatedProducts = Product::with('category')
+            ->where('category_id', $product->category_id)
+            ->where('id', '!=', $id) // Exclude the current product
+            ->get();
+            foreach ($relatedProducts as $relatedProduct) {
+                 $relatedProduct['image'] = asset('storage/' . $relatedProduct->image);
+            }
+
         return response()->json([
             "statusCode" => 200,
             "error" => false,
-            'data' => $product
+            'data' => [
+                'product' => $product,
+                'related_products' => $relatedProducts
+            ]
         ]);
     } catch (\Exception $e) {
         return response()->json(['statusCode' => 404, 'error' => true, 'message' => 'Product not found']);
     }
 }
+
 
 
 
@@ -536,6 +613,96 @@ public function getProvinces()
             ]);
         }
     }
+
+// Fetch all reating and review
+ public function ratingReview()
+{
+    try {
+        // Retrieve all rating reviews with associated product and user data
+        $ratingReviews = RatingReview::with('product', 'user')->get();
+
+        if ($ratingReviews->isEmpty()) {
+            return response()->json([
+                "statusCode" => 404,
+                "error" => true,
+                "message" => "RatingReview not found"
+            ]);
+        }
+
+        return response()->json([
+            "statusCode" => 200,
+            "error" => false,
+            "data" => $ratingReviews
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            "statusCode" => 500, // Use 500 for server errors
+            "error" => true,
+            "message" => "An error occurred: " . $e->getMessage()
+        ]);
+    }
+}
+
+
+// Fetch single products reating and review
+ public function singleproductratingReview($id)
+{
+    try {
+        // Retrieve all rating reviews with associated product and user data
+        $ratingReviews = RatingReview::with('product', 'user')->where('product_id',$id)->get();
+
+        if ($ratingReviews->isEmpty()) {
+            return response()->json([
+                "statusCode" => 404,
+                "error" => true,
+                "message" => "RatingReview not found"
+            ]);
+        }
+
+        return response()->json([
+            "statusCode" => 200,
+            "error" => false,
+            "data" => $ratingReviews
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            "statusCode" => 500, // Use 500 for server errors
+            "error" => true,
+            "message" => "An error occurred: " . $e->getMessage()
+        ]);
+    }
+}
+
+
+// post rating and review
+public function storeRatingReview(Request $request)
+{
+    // Validate incoming request data
+    $request->validate([
+        'product_id' => 'required|exists:products,id', // Ensure product exists
+        'user_id' => 'required|exists:users,id', // Ensure user exists
+        'rating' => 'required|integer|between:1,5', // Rating should be between 1 and 5
+        'review' => 'required|string|max:500', // review should not exceed 500 characters
+    ]);
+
+    try {
+        // Create a new rating review
+        $ratingReview = RatingReview::create($request->all());
+
+        return response()->json([
+            "statusCode" => 201,
+            "error" => false,
+            "message" => "RatingReview created successfully",
+            "data" => $ratingReview
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            "statusCode" => 500, // Use 500 for server errors
+            "error" => true,
+            "message" => "An error occurred: " . $e->getMessage()
+        ]);
+    }
+}
 
 
 

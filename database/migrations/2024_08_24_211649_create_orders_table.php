@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('streetaddress')->nullable();
             $table->string('total')->notnull();
             $table->string('status')->default('pending');
-            $table->string('invoice')->default(time());
+            $table->string('invoice');
             $table->timestamps();
         });
     }

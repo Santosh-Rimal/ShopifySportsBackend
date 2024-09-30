@@ -26,6 +26,16 @@ Route::get('abouts', [ApiController::class, 'aboutIndex']);
 Route::post('order', [ApiController::class, 'order']);
 Route::get('getOrder/{id}', [ApiController::class, 'getOrder']);
 Route::get('getOrder', [ApiController::class, 'getAllOrder']);
+Route::get('ratingReview', [ApiController::class, 'ratingReview']);
+Route::get('ratingReview/{id}', [ApiController::class, 'singleproductratingReview']);
+Route::post('storeRatingReview', [ApiController::class, 'storeRatingReview']);
+
+
+
+
+
+
+Route::put('updateOrderStatus/{data}', [ApiController::class, 'updateOrderStatus']);
 
 
 Route::get('getproduct', [ApiController::class, 'productsIndex']);

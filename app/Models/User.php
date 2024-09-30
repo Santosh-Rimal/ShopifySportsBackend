@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Contact;
+use App\Models\RatingReview;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -40,6 +41,11 @@ class User extends Authenticatable //Implements MustVerifyEmail
     public function order()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function ratingReviews()
+    {
+        return $this->hasMany(RatingReview::class);
     }
     /**
      * The attributes that should be hidden for serialization.

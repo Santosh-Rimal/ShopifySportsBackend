@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Cart;
 use App\Models\Category;
+use App\Models\RatingReview;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -29,5 +30,11 @@ public function cart()
 {
     return $this->hasMany(Cart::class);
 }
+
+
+public function ratingReviews()
+    {
+        return $this->hasMany(RatingReview::class);
+    }
 
 }

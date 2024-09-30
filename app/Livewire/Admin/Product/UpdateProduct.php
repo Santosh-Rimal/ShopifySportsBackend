@@ -44,7 +44,7 @@ class UpdateProduct extends Component
     // dd($this->category_id); 
     $this->validate();
 
-    $product = Product::findOrFail($this->category_id);
+    $product = Product::findOrFail($this->id);
     
     $data = [];
 
@@ -56,7 +56,13 @@ class UpdateProduct extends Component
         $data['description'] = $this->description;
     }
     if ($this->category_id) {
+        // dd($this->category_id);
         $data['category_id'] = $this->category_id;
+        // dd($data['category_id']);
+    }
+
+    if($this->price){
+         $data['price'] = $this->price;
     }
  
   if ($this->image) {
@@ -73,6 +79,7 @@ class UpdateProduct extends Component
 
 
     if (!empty($data)) {
+        // dd($data);
         $product->update($data);
     }
 
