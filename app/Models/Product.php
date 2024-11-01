@@ -11,11 +11,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Product extends Model
 {
     use HasFactory;
-    protected $fillable=['name',
-'description',
-'price',
-'image',
-'category_id'];
+    protected $fillable=[
+    'name',
+    'description',
+    'price',
+    'image',
+    'category_id',
+    'discount',
+    'discount_start_date',
+    'discount_end_date'
+];
 
 
 public function orderItems()
@@ -36,5 +41,24 @@ public function ratingReviews()
     {
         return $this->hasMany(RatingReview::class);
     }
+
+
+    public function getIsDiscountActiveAttribute()
+{
+    $today = Carbon::today();
+
+    // Check if the current date is within the discount period
+    if ($this->discount && $this->discount_start_date && $this->discount_end_date
+        && $today->between($this->discount_start_date, $this->discount_end_date)) {
+        return true;
+    }
+
+    // If today is outside the discount period, set discount to 0
+    $this->discount = 0;
+    $this->save();
+
+    return false;
+}
+
 
 }

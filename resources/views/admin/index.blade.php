@@ -26,7 +26,7 @@
         </div>
 
         <!-- Revenue Chart -->
-        {{-- <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
             <p class="text-xl font-semibold mb-4">Revenue Chart</p>
             <canvas id="revenueChart"></canvas>
         </div>
@@ -53,7 +53,7 @@
                 </div>
             </div>
 
-            <table class="min-w-full bg-white">
+            {{-- <table class="min-w-full bg-white">
                 <thead>
                     <tr>
                         <th class="py-2">S.N</th>
@@ -118,9 +118,9 @@
                         <td class="border px-4 py-2">120000</td>
                     </tr>
                 </tfoot>
-            </table>
+            </table> --}}
         </div>
-    </div> --}}
+    </div> -
     </div>
 @endsection
 @section('title')

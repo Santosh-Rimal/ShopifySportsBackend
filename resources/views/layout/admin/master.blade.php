@@ -5,7 +5,16 @@
              <p class=" capitalize">{{ Route::currentRouteName() }}</p>
          </h2>
      </x-slot>
+     <style>
+         .ck-editor__editable[role="textbox"] {
+             min-height: 300px;
+         }
 
+         .ck-content .image {
+             max-width: 80%;
+             margin: 20px auto;
+         }
+     </style>
      <div class="flex flex-col md:flex-row w-full">
 
          <!-- Sidebar -->
@@ -26,7 +35,6 @@
          {{-- <input type="text" id="tet"> --}}
          <!-- Main Content -->
          <div class="flex-1 p-6">
-
              @yield('contents')
          </div>
      </div>

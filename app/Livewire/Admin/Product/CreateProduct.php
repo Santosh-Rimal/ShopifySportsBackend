@@ -25,6 +25,14 @@ public $name;
     #[validate('required')]
     public $category_id;
 
+    #[validate('integer')]
+    public $discount;
+
+     #[validate('date|after_or_equal:today')]
+    public $discount_start_date;
+
+     #[validate('date|after_or_equal:discount_start_date')]
+    public $discount_end_date;
     public function render()
     {
         $categories = Category::get();
@@ -47,7 +55,10 @@ public $name;
             'description' => $validatedData['description'],
             'price' => $validatedData['price'],
             'image' => $validatedData['image'] ?? null,
-            'category_id' => $validatedData['category_id']
+            'category_id' => $validatedData['category_id'],
+            'discount'=> $validatedData['discount'],
+            'discount_start_date'=> $validatedData['discount_start_date'],
+            'discount_end_date'=> $validatedData['discount_end_date'],
         ]);
 
         session()->flash('status', 'Product successfully created.');

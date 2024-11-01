@@ -25,7 +25,6 @@ class CreateAbout extends Component
     public function save()
     {
         $this->validate();
-
             About::create([
                 'title' => $this->title,
                 'slogan' => $this->slogan,
@@ -42,5 +41,9 @@ class CreateAbout extends Component
     public function render()
     {
         return view('livewire.admin.about.create-about');
+    }
+
+    public function updated(){
+        $this->skipRender();
     }
 }

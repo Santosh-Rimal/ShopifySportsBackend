@@ -8,20 +8,31 @@
 
     <title>@yield('title', $title ?? config('app.name', 'ShopifySports'))</title>
     <link rel="icon" href="{{ asset('_d77d5989-d0fc-4f32-9dab-9dcac8042616.jfif') }}" type="image/x-icon">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
         integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- CKEditor Script -->
+    {{-- <script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/super-build/ckeditor.js"></script> --}}
     <style>
         .category {
             display: inline;
         }
-    </style>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+        .ck-editor__editable[role="textbox"] {
+            min-height: 300px;
+        }
+
+        .ck-content .image {
+            max-width: 80%;
+            margin: 20px auto;
+        }
+    </style>
 </head>
 
 <body class="font-sans antialiased">
@@ -43,36 +54,7 @@
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const ctx = document.getElementById('revenueChart').getContext('2d');
-        const revenueChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-                datasets: [{
-                    label: 'Revenue',
-                    data: [0, 10000, 5000, 15000, 10000, 20000],
-                    borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    tension: 0.1
-                }, {
-                    label: 'Orders',
-                    data: [0, 200, 100, 300, 200, 400],
-                    borderColor: 'rgb(54, 162, 235)',
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>
+    @stack('script')
 
 </body>
 

@@ -73,7 +73,9 @@ Route::get('/orders/{order}', [OrderController::class, 'showOrderDetails'])->mid
     // // Route::get('/service/create',CreateService::class)->middleware(['auth', 'verified','IsAdmin'])->name('services.create');
     // // Route::get('/service/update',UpdateService::class)->middleware(['auth', 'verified','IsAdmin'])->name('services.update');
 
-
+Route::get('ckeditor5',function(){
+    return view('welcome');
+});
     
 
 require __DIR__.'/auth.php';

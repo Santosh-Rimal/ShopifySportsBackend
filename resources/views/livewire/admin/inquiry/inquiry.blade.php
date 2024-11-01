@@ -83,10 +83,10 @@
 
     </div>
 </div>
-{{-- <script>
+<script>
     window.Echo.channel('contact')
         .listen('InquiryEvent', (e) => {
             console.log('New inquiry received:', e);
             alert("Contact added or Deleted");
         });
-</script> --}}
+</script>

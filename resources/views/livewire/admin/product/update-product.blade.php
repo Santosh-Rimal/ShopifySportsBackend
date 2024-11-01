@@ -48,7 +48,7 @@
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="description">Description</label>
                         <textarea
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('description') border-red-500 @enderror"
+                            class="ckeditor shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('description') border-red-500 @enderror"
                             id="description" wire:model.live="description" name="description" rows="4"></textarea>
                         @error('description')
                             <p class="text-red-500 text-xs italic">{{ $message }}</p>
@@ -61,6 +61,43 @@
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('price') border-red-500 @enderror"
                             id="price" wire:model.live="price" name="price" type="text">
                         @error('price')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Discount Field -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="discount">Discount (%)</label>
+                        <input
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('discount') border-red-500 @enderror"
+                            id="discount" wire:model="discount" name="discount" type="number" step="0.01">
+                        @error('discount')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Discount Start Date Field -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="discount_start_date">Discount
+                            Start Date</label>
+                        <input
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('discount_start_date') border-red-500 @enderror"
+                            id="discount_start_date" wire:model="discount_start_date" name="discount_start_date"
+                            type="date">
+                        @error('discount_start_date')
+                            <p class="text-red-500 text-xs italic">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Discount End Date Field -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="discount_end_date">Discount End
+                            Date</label>
+                        <input
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('discount_end_date') border-red-500 @enderror"
+                            id="discount_end_date" wire:model="discount_end_date" name="discount_end_date"
+                            type="date">
+                        @error('discount_end_date')
                             <p class="text-red-500 text-xs italic">{{ $message }}</p>
                         @enderror
                     </div>

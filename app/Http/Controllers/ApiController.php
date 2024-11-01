@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Cart;
 use App\Models\About;
 use App\Models\Order;
@@ -385,7 +386,8 @@ public function updateOrderStatus(Request $request, $transactionCode)
     try {
         // Retrieve the order based on the transaction_code from the URL
         $order = Order::where('invoice', $transactionCode)->first();
-        dd($request);
+
+        // Check if the order exists
         if (!$order) {
             return response()->json([
                 'statusCode' => 404,
@@ -394,17 +396,18 @@ public function updateOrderStatus(Request $request, $transactionCode)
             ]);
         }
 
-        // Update the status and other fields from the request
-        $order->update([
-            'status' => $request->input('status'), // Update the status
-            // Add other fields you want to update if necessary
-            // Example: 'total_amount' => $request->input('total_amount'),
+        // Validate the incoming request
+        $request->validate([
+            'status' => 'required|string', // Adjust the status values as needed
         ]);
+
+        // Update the status field
+        $order->update(['status' => $request->status]);
 
         return response()->json([
             'statusCode' => 200,
             'error'      => false,
-            'message'    => 'Order status updated to completed.',
+            'message'    => 'Order status updated successfully.',
             'order'      => $order,
         ]);
     } catch (\Exception $e) {
@@ -415,6 +418,7 @@ public function updateOrderStatus(Request $request, $transactionCode)
         ]);
     }
 }
+
 
 
 
@@ -496,10 +500,27 @@ public function updateOrderStatus(Request $request, $transactionCode)
 
     public function productsIndex()
     {
-        try {
-            $products = Product::with('category')->get();
-            foreach ($products as $key => $product) {
+ $today = Carbon::today();
+ try {
+     $products = Product::with('category')->get();
+     foreach ($products as $key => $product) {
                 $product['image']=asset('storage/' . $product->image);
+            }
+            
+             foreach ($products as $key => $product) {
+            if($product['discount']===0 || $product['discount']==='null'){
+                unset($product['discount']);
+                unset($product['discount_start_date']);
+                unset($product['discount_end_date']);
+            }
+        if ($today < $product->discount_start_date || $today > $product->discount_end_date){
+            $product['youwillget']=$product['discount'];
+            $product['discount']=0;
+            // $product['discount_start_date']='';
+            // $product['discount_end_date']='';
+
+        }
+
             }
             return response()->json([
                 "statusCode" => 200,
@@ -517,18 +538,38 @@ public function updateOrderStatus(Request $request, $transactionCode)
    public function productSingle($id)
 {
     try {
+        // Define today's date
+        $today = Carbon::today();
+
         // Fetch the product along with its category
         $product = Product::with('category')->findOrFail($id);
         $product['image'] = asset('storage/' . $product->image);
+
+
+        if($product['discount']===0 || $product['discount']==='null'){
+                unset($product['discount']);
+                unset($product['discount_start_date']);
+                unset($product['discount_end_date']);
+            }
+
+
+        // Check if the discount is active
+        if ($today < $product->discount_start_date || $today > $product->discount_end_date) {
+             $product['youwillget']=$product['discount'];
+            $product['discount'] = 0; // Set discount to 0 if not active
+            // $product['discount_start_date'] = ''; // Optionally clear these values
+            // $product['discount_end_date'] = '';
+        }
 
         // Fetch related products from the same category, excluding the current product
         $relatedProducts = Product::with('category')
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $id) // Exclude the current product
             ->get();
-            foreach ($relatedProducts as $relatedProduct) {
-                 $relatedProduct['image'] = asset('storage/' . $relatedProduct->image);
-            }
+
+        foreach ($relatedProducts as $relatedProduct) {
+            $relatedProduct['image'] = asset('storage/' . $relatedProduct->image);
+        }
 
         return response()->json([
             "statusCode" => 200,
@@ -542,6 +583,7 @@ public function updateOrderStatus(Request $request, $transactionCode)
         return response()->json(['statusCode' => 404, 'error' => true, 'message' => 'Product not found']);
     }
 }
+
 
 
 

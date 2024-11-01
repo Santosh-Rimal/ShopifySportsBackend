@@ -35,7 +35,7 @@ Route::post('storeRatingReview', [ApiController::class, 'storeRatingReview']);
 
 
 
-Route::put('updateOrderStatus/{data}', [ApiController::class, 'updateOrderStatus']);
+Route::put('updateOrderStatus/{invoice}', [ApiController::class, 'updateOrderStatus']);
 
 
 Route::get('getproduct', [ApiController::class, 'productsIndex']);

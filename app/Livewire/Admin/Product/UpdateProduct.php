@@ -20,6 +20,16 @@ class UpdateProduct extends Component
     public $description;
     #[validate('required|string|max:255')]
     public $price;
+
+    #[validate('integer')]
+    public $discount;
+
+     #[validate('date|after_or_equal:today')]
+    public $discount_start_date;
+
+     #[validate('date|after_or_equal:discount_start_date')]
+    public $discount_end_date;
+
     #[validate('nullable|image|max:1024')]
     public $image;
     #[validate('required')]
@@ -37,6 +47,9 @@ class UpdateProduct extends Component
         $this->photo = $id->image; 
         $this->price = $id->price; 
         $this->category_id = $id->id;
+        $this->discount = $id->discount;
+        $this->discount_start_date = $id->discount_start_date;
+        $this->discount_end_date = $id->discount_end_date;
     }
     
     public function update()
@@ -64,6 +77,17 @@ class UpdateProduct extends Component
     if($this->price){
          $data['price'] = $this->price;
     }
+
+
+    if($this->discount){
+        $data['discount']=$this->discount;
+    }
+if($this->discount_start_date){
+    $data['discount_start_date']=$this->discount_start_date;
+}
+if($this->discount_end_date){
+    $data['discount_end_date']=$this->discount_end_date;
+}
  
   if ($this->image) {
             if ($this->image instanceof \Illuminate\Http\UploadedFile) {
