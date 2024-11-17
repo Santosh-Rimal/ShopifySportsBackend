@@ -1,0 +1,110 @@
+GET API
+1.categories 					
+:http://127.0.0.1:8000/api/categories
+
+2.singleCategory				
+:http://127.0.0.1:8000/api/singlecategory/id
+
+2.aboutus    					
+:http://127.0.0.1:8000/api/abouts
+
+3.cart	     					
+:http://127.0.0.1:8000/api/getCarts
+
+4.Single cart  					
+:http://127.0.0.1:8000/api/single-user-cart/userid
+
+5.Single user order	     		
+:http://127.0.0.1:8000/api/getOrder/userId
+
+6.order	     					
+:http://127.0.0.1:8000/api/getOrder
+
+7.products   					
+:http://127.0.0.1:8000/api/getproduct
+
+8.singleProduct					
+:http://127.0.0.1:8000/api/getsingleproduct/id
+
+9.districts 					
+:http://127.0.0.1:8000/api/districts
+
+10.provinces					
+:http://127.0.0.1:8000/api/provinces
+
+11.districts by province name	
+:http://127.0.0.1:8000/api/districts/{province}
+
+12.All rating & review 		 	
+:http://127.0.0.1:8000/api/ratingReview
+
+12.Single product rating & review 
+:http://127.0.0.1:8000/api/ratingReview{id}
+
+13.Recommndation algorithm
+:http://127.0.0.1:8000/api/recommandation/{userid}
+
+POST API
+1.Contact	:http://127.0.0.1:8000/api/inquiries
+		{
+    		"name":"Name of the user",
+   			"email":"user email",
+   			"message":"Message"
+		}
+2.carts		:http://127.0.0.1:8000/api/carts
+		{
+   			 "user_id":1,
+   			 "product_id":1,
+    		 "quantity":6
+		}
+3.order		:http://127.0.0.1:8000/api/order
+		{
+   			'user_id'      : 1,
+            'name'         : "Santosh Rimal",            
+            'phoneno'      : 98XXXXXXXXXXXXX,       
+            'province'     : "Bagmati Pradesh",        
+            'district'     : "Chitwan",        
+            'city'         : "Bharatpur",          
+            'postalcode'   : "44200",      
+            'streetaddress': "bharatpur-06,shantitole",   
+            'total'        : "Total amount",
+            'status'       : 'pending',                        
+            'invoice'      : "Invoice",
+		}
+4.Signup 	:http://127.0.0.1:8000/api/signup
+		{
+  			"name":"user name",
+   			"email":"user email",
+   			"password":"password"
+		}
+5.Signin	:http://127.0.0.1:8000/api/signin
+		{
+   			"email":"user email",
+   			"password":"password"
+		}
+6.signout	:http://127.0.0.1:8000/api/signout //You have to send token also
+
+7.Store Rating and review
+:http://127.0.0.1:8000/api/storeRatingReview
+		{
+			"product_id":1,
+			"user_id":1,
+			"rating":5,
+			"review":"Very good Product"
+		}
+
+Update API
+1.update cart	:http://127.0.0.1:8000/api/updatecart/userid
+
+Delete API
+1.Delete Cart 	:http://127.0.0.1:8000/api/deletecarts/userid
+
+Update API
+1.Update order	:http://127.0.0.1/api/updateOrderStatus/{invoice}
+			{
+			.
+			.
+			"status":"completed",
+			.,
+			.
+			}
